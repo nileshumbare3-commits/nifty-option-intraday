@@ -27,7 +27,7 @@ def login():
     kite = KiteConnect(api_key=session['api_key'])
     return redirect(kite.login_url())
 
-@app.route('/callback')
+@app.route('/kite_callback')
 def callback():
     request_token = request.args.get('request_token')
     if not request_token:
