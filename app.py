@@ -5,6 +5,7 @@ from kiteconnect import KiteConnect
 
 app = Flask(__name__)
 app.secret_key = 'a-super-secret-key-that-is-static' # For session management
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 # Define the session file path
 SESSION_FILE = "kite_session.json"
