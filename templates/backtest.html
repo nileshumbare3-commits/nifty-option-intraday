@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nifty Options Strategy Backtester</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        .container { max-width: 800px; margin: auto; padding: 2em; border: 1px solid #ccc; border-radius: 10px; }
+        h1, h2 { text-align: center; }
+        .form-group { margin-bottom: 1em; }
+        label { display: block; margin-bottom: 0.5em; }
+        input[type="text"], input[type="date"], input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .form-row { display: flex; gap: 1em; }
+        .form-row .form-group { flex: 1; }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background-color: #0056b3; }
+        .logout { float: right; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/logout" class="logout">Logout</a>
+        <h1>Nifty Options Strategy Backtester</h1>
+
+        <form action="/run_backtest" method="post">
+            <h2>Backtest Parameters</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" id="start_date" name="start_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date">End Date</label>
+                    <input type="date" id="end_date" name="end_date" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="stop_loss">Stop Loss (₹)</label>
+                    <input type="number" id="stop_loss" name="stop_loss" value="1500" required>
+                </div>
+                <div class="form-group">
+                    <label for="target_profit">Target Profit (₹)</label>
+                    <input type="number" id="target_profit" name="target_profit" value="4500" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="instrument">Instrument</label>
+                <select id="instrument" name="instrument">
+                    <option value="NIFTY">NIFTY</option>
+                </select>
+            </div>
+
+            <button type="submit">Start Backtest</button>
+        </form>
+
+        <div id="results">
+            <!-- Backtesting results will be loaded here -->
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backtest Results</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        .container { max-width: 1000px; margin: auto; padding: 2em; border: 1px solid #ccc; border-radius: 10px; }
+        h1, h2 { text-align: center; }
+        .parameters, .summary, .trade-log { margin-bottom: 2em; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .back-link { display: block; margin-bottom: 1em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/backtest" class="back-link">&larr; New Backtest</a>
+        <h1>Backtest Results</h1>
+
+        <div class="parameters">
+            <h2>Parameters</h2>
+            <table>
+                <tr>
+                    <th>Start Date</th>
+                    <td>{{ results.parameters.start_date }}</td>
+                </tr>
+                <tr>
+                    <th>End Date</th>
+                    <td>{{ results.parameters.end_date }}</td>
+                </tr>
+                <tr>
+                    <th>Stop Loss</th>
+                    <td>₹{{ results.parameters.stop_loss }}</td>
+                </tr>
+                <tr>
+                    <th>Target Profit</th>
+                    <td>₹{{ results.parameters.target_profit }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="summary">
+            <h2>Summary</h2>
+            <p>{{ results.summary.status }}</p>
+            {% if results.summary.total_trades %}
+            <table>
+                <tr>
+                    <th>Total P&L</th>
+                    <td>{{ results.summary.total_pnl }}</td>
+                </tr>
+                <tr>
+                    <th>Total Trades</th>
+                    <td>{{ results.summary.total_trades }}</td>
+                </tr>
+                <tr>
+                    <th>Winning Trades</th>
+                    <td>{{ results.summary.winning_trades }}</td>
+                </tr>
+                <tr>
+                    <th>Losing Trades</th>
+                    <td>{{ results.summary.losing_trades }}</td>
+                </tr>
+                <tr>
+                    <th>Win Rate</th>
+                    <td>{{ results.summary.win_rate }}</td>
+                </tr>
+            </table>
+            {% endif %}
+        </div>
+
+        <div class="trade-log">
+            <h2>Trade Log</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Trade</th>
+                        <th>Entry Time</th>
+                        <th>Exit Time</th>
+                        <th>P&L</th>
+                        <th>Reason for Exit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trade in results.trade_log %}
+                    <tr>
+                        <td>{{ trade.date }}</td>
+                        <td>{{ trade.trade }}</td>
+                        <td>{{ trade.entry_time }}</td>
+                        <td>{{ trade.exit_time }}</td>
+                        <td>{{ trade.pnl }}</td>
+                        <td>{{ trade.reason_for_exit }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align:center;">No trades were executed.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

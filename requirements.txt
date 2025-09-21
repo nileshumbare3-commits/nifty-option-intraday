@@ -1,0 +1,4 @@
+flask
+kiteconnect
+pandas
+pandas-ta
