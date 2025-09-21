@@ -4,7 +4,7 @@ import json
 from kiteconnect import KiteConnect
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24) # For session management
+app.secret_key = 'a-super-secret-key-that-is-static' # For session management
 
 # Define the session file path
 SESSION_FILE = "kite_session.json"
