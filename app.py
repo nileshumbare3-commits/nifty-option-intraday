@@ -22,7 +22,7 @@ def login():
     # Store API key and secret in the server-side session for later use
     session['api_key'] = request.form.get('api_key')
     session['api_secret'] = request.form.get('api_secret')
-
+    
     # Create a KiteConnect instance and get the login URL
     kite = KiteConnect(api_key=session['api_key'])
     return redirect(kite.login_url())
@@ -43,11 +43,11 @@ def callback():
     try:
         kite = KiteConnect(api_key=api_key)
         data = kite.generate_session(request_token, api_secret=api_secret)
-
+        
         # Save the access token and other data to the session file for persistence
         with open(SESSION_FILE, 'w') as f:
             json.dump(data, f)
-
+            
         # Redirect to the main backtesting page
         return redirect(url_for('backtest_page'))
     except Exception as e:
@@ -88,7 +88,7 @@ def run_backtest():
         instruments_list = kite.instruments("NFO")
     except Exception as e:
         return f"Could not fetch instruments: {str(e)}", 500
-
+    
     instruments_df = pd.DataFrame(instruments_list)
 
     for day in all_days:
@@ -99,13 +99,13 @@ def run_backtest():
                 (instruments_df['instrument_type'] == 'FUT') &
                 (instruments_df['expiry'] >= pd.to_datetime(day))
             ].sort_values('expiry').iloc[0]
-
+            
             instrument_token = current_month_fut['instrument_token']
-
+            
             # --- Fetch 5-min historical data ---
             from_date = day.strftime('%Y-%m-%d') + " 09:15:00"
             to_date = day.strftime('%Y-%m-%d') + " 15:30:00"
-
+            
             data = kite.historical_data(instrument_token, from_date, to_date, "5minute")
             if not data:
                 continue # Skip if no data (e.g. holiday)
@@ -117,7 +117,7 @@ def run_backtest():
             # Anchor to the first 5-min candle (9:15)
             anchor_time = pd.to_datetime(day.strftime('%Y-%m-%d') + " 09:15:00").tz_localize('Asia/Kolkata')
             anchor_df = df[df['date'] >= anchor_time]
-
+            
             if anchor_df.empty:
                 continue
 
@@ -131,7 +131,7 @@ def run_backtest():
             anchor_df['sq_diff'] = (anchor_df['close'] - anchor_df['vwap'])**2
             anchor_df['variance'] = anchor_df['sq_diff'].expanding().mean()
             anchor_df['std_dev'] = anchor_df['variance'].pow(0.5)
-
+            
             anchor_df['upper_band'] = anchor_df['vwap'] + anchor_df['std_dev']
             anchor_df['lower_band'] = anchor_df['vwap'] - anchor_df['std_dev']
 
@@ -140,27 +140,27 @@ def run_backtest():
             for i, row in anchor_df.iterrows():
                 if trade_triggered:
                     break
-
+                
                 if row['date'].time() > datetime.strptime("09:30", "%H:%M").time():
                     trade_details = None
                     # Bullish breakout -> Sell Put Spread
                     if row['close'] > row['upper_band']:
                         trade_details = simulate_spread_trade(
-                            kite, instruments_df, day, row, 'PE',
+                            kite, instruments_df, day, row, 'PE', 
                             stop_loss, target_profit
                         )
                         trade_triggered = True
                     # Bearish breakout -> Sell Call Spread
                     elif row['close'] < row['lower_band']:
                         trade_details = simulate_spread_trade(
-                            kite, instruments_df, day, row, 'CE',
+                            kite, instruments_df, day, row, 'CE', 
                             stop_loss, target_profit
                         )
                         trade_triggered = True
-
+                    
                     if trade_details:
                         trade_log.append(trade_details)
-
+        
         except Exception as e:
             print(f"Error processing {day.strftime('%Y-%m-%d')}: {str(e)}")
 
@@ -180,7 +180,7 @@ def get_next_weekly_expiry(trade_date, instruments_df):
     """Finds the next weekly expiry date from the trade date."""
     trade_date = pd.to_datetime(trade_date)
     nifty_options = instruments_df[
-        (instruments_df['name'] == 'NIFTY') &
+        (instruments_df['name'] == 'NIFTY') & 
         (instruments_df['instrument_type'] == 'CE')
     ]
     future_expiries = nifty_options[nifty_options['expiry'] > trade_date]['expiry'].unique()
@@ -189,7 +189,7 @@ def get_next_weekly_expiry(trade_date, instruments_df):
 def simulate_spread_trade(kite, instruments_df, trade_day, breakout_row, option_type, sl, tp):
     LOT_SIZE = 50
     STRIKE_DIFFERENCE = 300
-
+    
     breakout_price = breakout_row['close']
     breakout_time = breakout_row['date']
 
@@ -207,7 +207,7 @@ def simulate_spread_trade(kite, instruments_df, trade_day, breakout_row, option_
 
     from_time = breakout_time
     to_time = pd.to_datetime(trade_day.strftime('%Y-%m-%d') + " 15:30:00").tz_localize('Asia/Kolkata')
-
+    
     sell_data = pd.DataFrame(kite.historical_data(sell_leg['instrument_token'], from_time, to_time, "minute"))
     buy_data = pd.DataFrame(kite.historical_data(buy_leg['instrument_token'], from_time, to_time, "minute"))
 
@@ -266,6 +266,10 @@ def logout():
     # Clear the flask session
     session.clear()
     return redirect(url_for('index'))
+
+@app.route('/check_session')
+def check_session():
+    return session.copy()
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8080)
